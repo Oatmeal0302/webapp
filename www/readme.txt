@@ -1,0 +1,1 @@
+This folder saves static and templates files.
