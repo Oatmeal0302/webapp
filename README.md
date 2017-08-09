@@ -1,2 +1,2 @@
 # webapp
-a project to practice python
+A project to practice python
