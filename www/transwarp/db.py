@@ -282,8 +282,23 @@ def _update(sql, *args):
             cursor.close()
 
 
+def insert(table, **kw):
+    cols, args = zip(*kw.iteritems())
+    sql = 'insert into `%s` (%s) values (%s)' % (table, ','.join(['`%s`' % col for col in cols]), ','.join(['?' for i in range(len(cols))]))
+    return _update(sql, *args)
 
 
+def update(sql, *args):
+    r
+    return _update(sql, *args)
+
+if __name__ == '__main__':
+    logging.basicConfig(level = logging.DEBUG)
+    create_engine('www-data','www-data','test')
+    update('drop table if exists user')
+    update('create table user (id int primary key, name text, email text, passwd text, last_modified real)')
+    import doctest
+    doctest.testmod()
 
 
 
