@@ -127,9 +127,42 @@ def create_engine(user, password, database, host = '127.0.0.1', port = 3306, **k
     global engine
     if engine is not None:
         raise DBError('Engine is already initialized.')
-        
+    params = dict(user=user, password=password, database= database, host=host, port=port)
+    defaults = dict(use_unicode=True, charset='utf8',collation='utf8_general_ci', autocommit=False)
+    for k, v in defaults.iteritems():
+        params[k] = kw.pop(k, v)
+    params.update(kw)
+    params['buffered'] = True
+    engine = _Engine(lambda:mysql.connector.connect(**params))
+    logging.info('Init mysql engine <%s> ok.' % hex(id(engine)))
     
 
+class _ConnectionCtx(object):
+    def __enter__(self):
+        global _db_ctx
+        self.should_cleanup = False
+        if not _db.ctx.is_init():
+            _db_ctx.init()
+            self.should_cleanup = True
+        return self
+
+
+    def __exit__(self, exctype, excvalue, traceback):
+        global _db_ctx
+        if self.should_cleanup:
+            _db_ctx.cleanup()
+    
+
+def connection():
+    return _ConnectionCtx()
+
+
+def with_connection(func):
+    @functools.warps(func)
+    def _wrapper(*args, **kw):
+        with _ConnectionCtx():
+            return func(*args, **kw)
+    return _wrapper
 
 
 
